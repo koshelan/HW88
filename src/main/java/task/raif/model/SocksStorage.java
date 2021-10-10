@@ -1,16 +1,26 @@
 package task.raif.model;
 
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
+import org.hibernate.validator.constraints.Length;
+
 import javax.persistence.*;
 
 @Entity
-@Table (name = "socks_storage")
+@Table(name = "socks_storage")
+@OptimisticLocking(type = OptimisticLockType.VERSION)
 public class SocksStorage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    @Length(max = 255)
     private String color;
     private int cottonPart;
     private long quantity;
+    @Version
+    private long version;
+
 
     public SocksStorage() {
     }
@@ -52,4 +62,13 @@ public class SocksStorage {
     public void setQuantity(long quantity) {
         this.quantity = quantity;
     }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
 }

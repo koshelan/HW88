@@ -1,16 +1,15 @@
 package task.raif.service;
 
 import org.springframework.stereotype.Service;
-import task.raif.enumContainer.Operations;
-import task.raif.exception.NotFoundException;
-import task.raif.model.Sock;
+import task.raif.exception.NotEnoughSocksException;
+import task.raif.model.SocksFilter;
 import task.raif.model.SocksLot;
 import task.raif.model.SocksStorage;
 import task.raif.repository.SocksMySQLRepository;
 
+import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class SocksService {
@@ -22,58 +21,73 @@ public class SocksService {
     }
 
     public List<SocksLot> getAll() {
-        return StreamSupport.stream(repository.findAll().spliterator(), false)
-                            .map(o -> new SocksLot(o.getColor(), o.getCottonPart(), o.getQuantity()))
-                            .collect(Collectors.toList());
+        return repository.findAll().stream()
+                         .map(o -> new SocksLot(o.getColor(), o.getCottonPart(), o.getQuantity()))
+                         .collect(Collectors.toList());
     }
 
-    public long get(Sock sock, Operations operator) {
-        switch (operator) {
-            case MORE_THEN:
-                return repository.getQuantityByColorAndCottonPartMoreThen(sock.getColor(), sock.getCottonPart())
-                                 .orElse(0);
-            case LESS_THEN:
-                return repository.getQuantityByColorAndCottonPartLessThen(sock.getColor(), sock.getCottonPart())
-                                 .orElse(0);
+    public long get(SocksFilter socksFilter) {
+        switch (socksFilter.getOperation()) {
+            case MORE_THAN:
+                return repository
+                        .getQuantityByColorAndCottonPartMoreThen(socksFilter.getColor(), socksFilter.getCottonPart())
+                        .orElse(0);
+            case LESS_THAN:
+                return repository
+                        .getQuantityByColorAndCottonPartLessThen(socksFilter.getColor(), socksFilter.getCottonPart())
+                        .orElse(0);
             case EQUAL:
                 var socksStorage = repository
-                        .getByColorAndCottonPart(sock.getColor(), sock.getCottonPart());
-                return socksStorage.isPresent() ? socksStorage.get().getQuantity()
-                                                : 0;
-
+                        .getByColorAndCottonPart(socksFilter.getColor(), socksFilter.getCottonPart());
+                return socksStorage.map(SocksStorage::getQuantity).orElse(0L);
             default:
-                throw new NotFoundException();
+                throw new IllegalStateException("Unknown Enum type" + socksFilter.getOperation().name());
         }
     }
 
     public SocksLot put(SocksLot lot) {
         var socksInStorage = repository.getByColorAndCottonPart(lot.getColor(), lot.getCottonPart());
-        if (socksInStorage.isPresent()) {
-            var socks = socksInStorage.get();
-            socks.setQuantity(socks.getQuantity() + lot.getQuantity());
-            repository.save(socks);
-        } else {
-            repository.save(new SocksStorage(lot.getColor(), lot.getCottonPart(), lot.getQuantity()));
+        try {
+            if (socksInStorage.isPresent()) {
+                var socks = socksInStorage.get();
+                socks.setQuantity(socks.getQuantity() + lot.getQuantity());
+                repository.save(socks);
+                lot.setQuantity(socks.getQuantity());
+            } else {
+                repository.save(new SocksStorage(lot.getColor(), lot.getCottonPart(), lot.getQuantity()));
+            }
+            return lot;
+        } catch (OptimisticLockException e) {
+            System.out.println(e.getMessage());
+            return put(lot);
         }
-        return lot;
-
     }
 
     public SocksLot take(SocksLot lot) {
         var socksInStorage = repository.getByColorAndCottonPart(lot.getColor(), lot.getCottonPart());
-        if (socksInStorage.isPresent()) {
-            var socks = socksInStorage.get();
-            if (socks.getQuantity() >= lot.getQuantity()) {
-                if (socks.getQuantity() == lot.getQuantity()) {
-                    repository.deleteById(socks.getId());
-                } else {
-                    socks.setQuantity(socks.getQuantity() - lot.getQuantity());
-                    repository.save(socks);
-                }
-                return lot;
-            }
+        if (!socksInStorage.isPresent()) {
+            throw new NotEnoughSocksException("Socks with " + lot.getColor() + " color and " + lot.getCottonPart()
+                                                      + " Cotton Part not found");
         }
-        throw new NotFoundException();
+        var socks = socksInStorage.get();
+        try {
+            if (socks.getQuantity() > lot.getQuantity()) {
+                socks.setQuantity(socks.getQuantity() - lot.getQuantity());
+                repository.save(socks);
+                return lot;
+            } else if (socks.getQuantity() == lot.getQuantity()) {
+                repository.deleteById(socks.getId());
+                return lot;
+            } else {
+                throw new NotEnoughSocksException("Not enough socks with " + lot.getColor() + " color and "
+                                                          + lot.getCottonPart() + " Cotton Part not found");
+            }
+        } catch (OptimisticLockException e) {
+            System.out.println(e.getMessage());
+            return take(lot);
+        }
     }
 
 }
+
+

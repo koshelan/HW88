@@ -1,11 +1,16 @@
 package task.raif.model;
 
+import org.springframework.lang.NonNull;
+import task.raif.enumContainer.Operations;
+import task.raif.exception.SocksValidationException;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 
-public class Sock {
+public class SocksFilter {
+
     @NotBlank
     private final String color;
 
@@ -13,11 +18,13 @@ public class Sock {
     @Max(100)
     private final int cottonPart;
 
-    public Sock(String color, int cottonPart) {
+    @NonNull
+    Operations operation;
 
+    public SocksFilter(String color, int cottonPart, Operations operation) {
         this.color = color;
-
         this.cottonPart = cottonPart;
+        this.operation = operation;
     }
 
     public String getColor() {
@@ -28,6 +35,10 @@ public class Sock {
         return cottonPart;
     }
 
+    public Operations getOperation() {
+        return operation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -36,20 +47,15 @@ public class Sock {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Sock sock = (Sock) o;
-        return cottonPart == sock.cottonPart && Objects.equals(color, sock.color);
-    }
-
-    @Override
-    public String toString() {
-        return "Sock{" +
-                "color='" + color + '\'' +
-                ", cottonPart=" + cottonPart +
-                '}';
+        SocksFilter socksFilter = (SocksFilter) o;
+        return cottonPart == socksFilter.cottonPart && Objects.equals(color, socksFilter.color);
     }
 
     @Override
     public int hashCode() {
-        return color.hashCode()+cottonPart;
+        return Objects.hash(color, cottonPart, operation);
     }
+
+
+
 }

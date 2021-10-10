@@ -10,11 +10,32 @@ POST http://localhost:8080/api/socks/income
 Content-Type: application/json
 
 {
-  "color": "red",
+  "color": "blue",
   "cottonPart": 50,
-  "quantity": 50
+  "quantity": 10
 }
 
+###
+
+POST http://localhost:8080/api/socks/income
+Content-Type: application/json
+
+{
+  "color": "blue",
+  "cottonPart": 60,
+  "quantity": 10
+}
+
+###
+
+POST http://localhost:8080/api/socks/income
+Content-Type: application/json
+
+{
+  "color": "red",
+  "cottonPart": 50,
+  "quantity": 10
+}
 
 ###
 
@@ -30,7 +51,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/api/socks?color=red&operation=equal&cottonPart=dasfa
+GET http://localhost:8080/api/socks?color=red&operation=equal&cottonPart=50
 
 ###
 

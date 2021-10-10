@@ -1,5 +1,7 @@
 package task.raif.model;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -8,6 +10,7 @@ import javax.validation.constraints.NotNull;
 public class SocksLot {
 
     @NotBlank
+    @Length(max = 255)
     private String color;
 
     @NotNull
@@ -28,9 +31,9 @@ public class SocksLot {
         this.quantity = quantity;
     }
 
-    public SocksLot(Sock sock, long quantity) {
-        this.color = sock.getColor();
-        this.cottonPart = sock.getCottonPart();
+    public SocksLot(SocksFilter socksFilter, long quantity) {
+        this.color = socksFilter.getColor();
+        this.cottonPart = socksFilter.getCottonPart();
         this.quantity = quantity;
     }
 
@@ -60,7 +63,7 @@ public class SocksLot {
 
     @Override
     public String toString() {
-        return "SocksRequestParam{" +
+        return "SocksLot{" +
                 "color='" + color + '\'' +
                 ", cottonPart=" + cottonPart +
                 ", quantity=" + quantity +

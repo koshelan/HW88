@@ -7,8 +7,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum Operations {
-    LESS_THEN("lessThan"),
-    MORE_THEN("moreThan"),
+    LESS_THAN("lessThan"),
+    MORE_THAN("moreThan"),
     EQUAL("equal");
 
     private static final Map<String, Operations> titleMap = Arrays.stream(Operations.values())
