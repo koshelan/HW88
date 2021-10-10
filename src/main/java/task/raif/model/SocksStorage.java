@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class SocksStorage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Length(max = 255)
     private String color;

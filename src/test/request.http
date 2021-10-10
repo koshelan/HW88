@@ -22,7 +22,7 @@ Content-Type: application/json
 
 {
   "color": "blue",
-  "cottonPart": 60,
+  "cottonPart": 50,
   "quantity": 10
 }
 
@@ -44,8 +44,8 @@ Content-Type: application/json
 
 {
   "color": "red",
-  "cottonPart": 60,
-  "quantity": 30
+  "cottonPart": 50,
+  "quantity": 5
 }
 
 
@@ -59,7 +59,7 @@ GET http://localhost:8080/api/socks?color=red&operation=lessThan&cottonPart=50
 
 ###
 
-GET http://localhost:8080/api/socks?color=blue&cottonPart=10
+GET http://localhost:8080/api/socks?color=blue&cottonPart=50
 
 ###
 
